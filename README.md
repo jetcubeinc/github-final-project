@@ -32,8 +32,11 @@ You can run the script using the terminal:
 
 ```bash
 bash simple-interest.sh <Principal> <Rate> <Time>
+
 bash simple-interest.sh 1000 5 2
+
 Simple Interest = 100.00
+
 github-final-project/
 ├── CODE_OF_CONDUCT.md
 ├── CONTRIBUTING.md
