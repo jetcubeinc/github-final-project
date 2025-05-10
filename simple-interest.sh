@@ -1,15 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-if [[ $# -ne 3 ]]; then
-  echo "Usage: $0 principal rate time"
-  exit 1
+# Check that exactly 3 arguments are provided
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <Principal> <Rate> <Time>"
+    exit 1
 fi
 
-principal=$1
-rate=$2
-time=$3
+P=$1
+R=$2
+T=$3
 
-# Calculate simple interest: SI = P * R * T / 100
-si=$(echo "scale=2; $principal * $rate * $time / 100" | bc)
+# Calculate simple interest using bc for decimal precision
+SI=$(echo "scale=2; ($P * $R * $T) / 100" | bc)
 
-echo "Simple Interest: $si"
+# Display the result
+echo "Simple Interest = $SI"
+
