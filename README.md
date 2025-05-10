@@ -41,3 +41,11 @@ github-final-project/
 ├── LICENSE
 ├── README.md
 └── simple-interest.sh
+
+✅ Paste that into your `README.md`, commit the changes, and then open the file in GitHub to view the nicely rendered version.
+
+Once that’s done, take your screenshot showing:
+- The formatted `README.md` with the formula, how to run, and file structure
+- URL bar and page title visible
+
+Send it here and I’ll confirm you’re all set for **Task 3: Full 2 points**.
