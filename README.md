@@ -1,3 +1,4 @@
+![CI Build](https://github.com/jetcubeinc/github-final-project/actions/workflows/ci-build.yaml/badge.svg)
 
 # Introduction to Git and GitHub
 
