@@ -1,3 +1,8 @@
+
+# Introduction to Git and GitHub
+
+This is a test edit to demonstrate a typo fix for a Git pull request.
+=======
 # Simple Interest Calculator
 
 This is a basic Bash script that calculates simple interest given the principal amount, annual rate of interest, and time period in years.
@@ -40,4 +45,5 @@ github-final-project/
 ├── LICENSE
 ├── README.md
 └── simple-interest.sh
+
 
