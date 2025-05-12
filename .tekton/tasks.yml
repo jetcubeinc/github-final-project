@@ -1,20 +1,33 @@
 # tasks.yml
+# This file defines Tekton Tasks for your CI/CD pipeline.
+
+--- # Separator for multiple Tekton objects in one file
 apiVersion: tekton.dev/v1 # Use the appropriate Tekton API version
 kind: Task
 metadata:
   name: cleanup # Name of the cleanup task
+  labels:
+    app.kubernetes.io/version: "0.1" # Example label
 spec:
   description: >-
     This task cleans up resources created during the pipeline run.
     Customize this task to delete specific resources (e.g., deployments, services, temporary files).
 
+  # Define workspaces if this task needs access to shared volumes
+  # workspaces:
+  #   - name: source # Example workspace for accessing source code
+
   steps:
     - name: remove-temp-directory # A simple cleanup step example
       image: ubuntu # Use an image with necessary tools (e.g., kubectl, oc, or just a basic shell)
+      # Working directory for the step (optional, defaults to /tekton/home)
+      # workingDir: $(workspaces.source.path) # Example if using a workspace
       script: |
         #!/bin/bash
         # Example: Remove a temporary directory
         echo "Running cleanup task..."
+        # Check if a specific directory exists in the workspace and remove it
+        # Replace '/workspace/temp-output' with the actual path used by your pipeline
         if [ -d "/workspace/temp-output" ]; then # Assuming a workspace volume and a temp directory
           echo "Removing /workspace/temp-output..."
           rm -rf /workspace/temp-output
@@ -26,19 +39,60 @@ spec:
         # e.g., oc delete deployment my-app || true # Example OpenShift cleanup
         # e.g., kubectl delete service my-service || true # Example Kubernetes cleanup
 
----
-# You would define other Tasks in the same file, separated by ---
-# Example of another task (e.g., a build task)
-# apiVersion: tekton.dev/v1
-# kind: Task
-# metadata:
-#   name: build-image
-# spec:
-#   steps:
-#     - name: build-and-push
-#       image: buildah # Or kaniko, docker, etc.
-#       script: |
-#         #!/bin/bash
-#         # Commands to build and push your container image
-#         echo "Running build task (placeholder)..."
-#         # ... your build commands ...
+--- # Separator for the next Tekton Task
+apiVersion: tekton.dev/v1 # Use the appropriate Tekton API version
+kind: Task
+metadata:
+  name: run-nose-tests # Name of the nose test task
+  labels:
+    app.kubernetes.io/version: "0.1" # Example label
+spec:
+  description: >-
+    This task runs the project's tests using the nose2 test runner.
+
+  # Define workspaces if this task needs access to shared volumes (usually needed for tests)
+  workspaces:
+    - name: source # Workspace to checkout the source code into
+
+  steps:
+    - name: fetch-code # Step to fetch the source code
+      image: gcr.io/tekton-releases/github.com/tektoncd/catalog/git-clone:latest # Use a standard git clone task image
+      # This step uses the 'git-clone' task image, which requires specific parameters
+      # These parameters are typically passed from the PipelineRun
+      # Ensure your PipelineRun provides these params and connects the 'source' workspace
+      # Example parameters (you'll define these in your PipelineRun):
+      # PARAMS:
+      #   - name: url
+      #     value: $(params.repo-url)
+      #   - name: revision
+      #     value: $(params.repo-revision)
+      #   - name: subdirectory
+      #     value: "" # Or the subdirectory if your code isn't at the root
+      #   - name: deleteExisting
+      #     value: "true"
+
+    - name: setup-python-and-install-deps # Step to set up Python and install dependencies
+      image: python:3.9 # Use a Python image (adjust version as needed)
+      workingDir: $(workspaces.source.path) # Work in the directory where code was cloned
+      script: |
+        #!/bin/bash
+        # Set up Python environment
+        python -m pip install --upgrade pip
+        # Install nose2 and any project dependencies required for tests
+        # Assuming dependencies are in a requirements.txt file
+        pip install nose2 # Install the test runner
+        # If you have a requirements.txt file, uncomment the line below:
+        # pip install -r requirements.txt
+
+    - name: run-tests # Step to execute the nose tests
+      image: python:3.9 # Use the same Python image
+      workingDir: $(workspaces.source.path) # Work in the source directory
+      script: |
+        #!/bin/bash
+        echo "Running nose tests..."
+        # Execute the nose2 command
+        # Adjust command if you have specific test directories or options
+        nose2
+        echo "Nose tests finished."
+
+
