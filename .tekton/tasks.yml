@@ -1,11 +1,44 @@
-apiVersion: tekton.dev/v1beta1
+# tasks.yml
+apiVersion: tekton.dev/v1 # Use the appropriate Tekton API version
 kind: Task
 metadata:
-  name: say-hello
+  name: cleanup # Name of the cleanup task
 spec:
+  description: >-
+    This task cleans up resources created during the pipeline run.
+    Customize this task to delete specific resources (e.g., deployments, services, temporary files).
+
   steps:
-    - name: echo
-      image: alpine
+    - name: remove-temp-directory # A simple cleanup step example
+      image: ubuntu # Use an image with necessary tools (e.g., kubectl, oc, or just a basic shell)
       script: |
-        #!/bin/sh
-        echo "Hello from Tekton!"
+        #!/bin/bash
+        # Example: Remove a temporary directory
+        echo "Running cleanup task..."
+        if [ -d "/workspace/temp-output" ]; then # Assuming a workspace volume and a temp directory
+          echo "Removing /workspace/temp-output..."
+          rm -rf /workspace/temp-output
+          echo "Cleanup complete."
+        else
+          echo "Temporary directory not found, nothing to clean."
+        fi
+        # Add more cleanup commands here as needed
+        # e.g., oc delete deployment my-app || true # Example OpenShift cleanup
+        # e.g., kubectl delete service my-service || true # Example Kubernetes cleanup
+
+---
+# You would define other Tasks in the same file, separated by ---
+# Example of another task (e.g., a build task)
+# apiVersion: tekton.dev/v1
+# kind: Task
+# metadata:
+#   name: build-image
+# spec:
+#   steps:
+#     - name: build-and-push
+#       image: buildah # Or kaniko, docker, etc.
+#       script: |
+#         #!/bin/bash
+#         # Commands to build and push your container image
+#         echo "Running build task (placeholder)..."
+#         # ... your build commands ...
